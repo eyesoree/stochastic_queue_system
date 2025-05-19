@@ -1,0 +1,18 @@
+{
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build all src files",
+            "command": "F:\\MinGW\\bin\\g++.exe",
+            "args": [
+                "-g",
+                "*.cpp",
+                "-o",
+                "${workspaceFolder}/build/program/${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/src"
+            }
+        },
+    ]
+}
