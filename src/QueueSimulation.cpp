@@ -1,29 +1,36 @@
 void QueueSimulation::run() {
     simulationStartTime = currentTime;
-    lastEventTime = currentTime;
 
-    // Make sure there's at least one arrival event to start
+    // Schedule the first arrival
     if (eventQueue.empty())
         scheduleArrival();
 
-    // Main simulation loop
-    while (totalServiced < maxCustomers && !eventQueue.empty()) {
+    while (!eventQueue.empty()) {
         Event ev = eventQueue.top();
         eventQueue.pop();
 
-        updateTimeWeightedStats();
-        currentTime = ev.getTime();
+        double nextTime = ev.getTime();
+        double timeDiff = nextTime - currentTime;
 
-        // Process event based on type
+        if (timeDiff > 0) {
+            totalQueueLength += waitingCustomers.size() * timeDiff;
+
+            for (const auto& server : servers) {
+                if (server.status == ServerStatus::BUSY)
+                    totalServerBusy += timeDiff;
+            }
+
+            currentTime = nextTime;
+        }
+
+        // Process the event.
         if (ev.getType() == EventType::ARRIVAL)
             processArrival();
         else  // DEPARTURE
             processDeparture(ev.getID());
     }
 
-    updateTimeWeightedStats();
-
-    // Process remaining customers in queue for final delay calculation
+    // Process any remaining waiting customers for final delay calculation.
     while (!waitingCustomers.empty()) {
         double arrivalTime = waitingCustomers.front();
         waitingCustomers.pop();
@@ -86,28 +93,6 @@ void QueueSimulation::scheduleDeparture(const size_t& id) {
     eventQueue.push(Event(EventType::DEPARTURE, departureTime, id));
 }
 
-void QueueSimulation::updateTimeWeightedStats() {
-    double timeDiff = currentTime - lastEventTime;
-
-    if (timeDiff <= 0) {
-        // No time has passed since last event
-        lastEventTime = currentTime;
-        return;
-    }
-
-    totalQueueLength += waitingCustomers.size() * timeDiff;
-
-    int busyServers = 0;
-    for (const auto& server : servers) {
-        if (server.status == ServerStatus::BUSY) {
-            busyServers++;
-        }
-    }
-
-    totalServerBusy += busyServers * timeDiff;
-    lastEventTime = currentTime;
-}
-
 void QueueSimulation::printStatistics() {
     double totalSimulationTime = currentTime - simulationStartTime;
 
@@ -131,7 +116,8 @@ void QueueSimulation::printStatistics() {
     size_t customersInSystem = totalArrivals - totalRejected;
     double avgDelay = (customersInSystem > 0) ? (totalDelay / customersInSystem) : 0.0;
 
-    double avgServerUtilization = totalServerBusy / (numServers * totalSimulationTime);
+    // Calculate server utilization correctly - divide by total simulation time
+    double avgServerUtilization = totalServerBusy / totalSimulationTime;
 
     std::cout << "Average queue length: " << avgQueueLength << "\n";
     std::cout << "Average customer waiting time: " << avgDelay << "\n";

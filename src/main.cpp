@@ -4,7 +4,7 @@
  *
  * AUTHOR: Salih, Johaire C.
  * CREATED DATE: 03-23-2025 3:23 PM
- * TOTAL HOUR SPENT: 2
+ * TOTAL HOUR SPENT: 5
  *
  * This file implements a discrete event simulation for a queue system using
  * exponential distributions for inter-arrival and service times. The simulation
@@ -13,16 +13,16 @@
 
 #include "QueueSimulation.h"
 
-int main() {
-    double iA_mean = 0.25;            // mean for inter-arrival generation
-    double sD_mean = 0.2;             // mean for service duration generation
-    size_t totalCustomer = 10000;     // maximum customers to serve
-    size_t numberOfServers = 1;       // number of server to utilize
-    size_t waitingQueueCapacity = 5;  // maximum customer that the waiting queue can hold
+void testScenarios(double iA, double sD, size_t nServer) {
+    QueueSimulation simulation(iA, sD, 1000, nServer, 5);
 
-    QueueSimulation simulation(iA_mean, sD_mean, totalCustomer, numberOfServers, waitingQueueCapacity);
     simulation.run();
     simulation.printStatistics();
+}
 
+int main() {
+    testScenarios(1.0, 1.0, 1);  // iA == sD
+    testScenarios(0.5, 1.0, 1);  // iA < sD
+    testScenarios(2.0, 1.0, 1);  // iA > sD
     return 0;
 }

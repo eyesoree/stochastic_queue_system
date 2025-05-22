@@ -29,7 +29,6 @@ class QueueSimulation {
 
     // Statistics variables
     double simulationStartTime = 0.0;  // When simulation started
-    double lastEventTime = 0.0;        // Time of the last event processed (for statistics)
     double totalQueueLength = 0.0;     // Time-weighted sum of queue lengths
     double totalDelay = 0.0;           // Total waiting time of all customers
     double totalServerBusy = 0.0;      // Total time servers were busy

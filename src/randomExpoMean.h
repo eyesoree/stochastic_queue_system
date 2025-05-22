@@ -9,6 +9,7 @@
 #define RANDOMGENEXPOMEAN_H
 #include <cmath>
 #include <cstdlib>
+#include <random>
 
 using namespace std;
 
@@ -24,26 +25,25 @@ class RandomExpoMean {
     double Globalmean;
     double average;
     int count;
+    std::random_device rd;
+    std::mt19937 gen;
+    std::exponential_distribution<> dist;
     void generate();
 };
 
 void RandomExpoMean::generate() {
-    // double uniform = rand() % int (60*Globalmean-1) + 1;
-    // randomExpoMean = -1*log(1-(uniform/60));
-
-    double uniform = rand() % int(60 * Globalmean - 1) + 1;
-    randomExpoMean =
-        -1 * log(1 - (uniform / (60.0 * Globalmean))) * Globalmean * 60;
+    randomExpoMean = dist(gen);
 }
 
-RandomExpoMean::RandomExpoMean(double mean) {
+RandomExpoMean::RandomExpoMean(double mean)
+    : Globalmean(mean), count(0), average(0), gen(rd()), dist(1.0 / mean)  // lambda = 1/mean for exponential distribution
+{
+}
+
+void RandomExpoMean::setMean(double mean) {
     Globalmean = mean;
-    count = 0;
-    average = 0;
+    dist = std::exponential_distribution<>(1.0 / mean);
 }
-
-// this member function resets everything
-void RandomExpoMean::setMean(double mean) { Globalmean = mean; }
 
 double RandomExpoMean::getValue() {
     count++;
