@@ -1,5 +1,6 @@
 void QueueSimulation::run() {
     simulationStartTime = currentTime;
+    lastEventTime = currentTime;
 
     // Make sure there's at least one arrival event to start
     if (eventQueue.empty())
@@ -21,6 +22,13 @@ void QueueSimulation::run() {
     }
 
     updateTimeWeightedStats();
+
+    // Process remaining customers in queue for final delay calculation
+    while (!waitingCustomers.empty()) {
+        double arrivalTime = waitingCustomers.front();
+        waitingCustomers.pop();
+        totalDelay += (currentTime - arrivalTime);
+    }
 }
 
 void QueueSimulation::processArrival() {
@@ -39,9 +47,11 @@ void QueueSimulation::processArrival() {
         }
     }
 
-    // All servers busy → enqueue customer
+    // All servers busy → try to enqueue customer
     if (waitingCustomers.size() < maxQueue)
-        waitingCustomers.push(currentTime);  // Add to queue only if there's room
+        waitingCustomers.push(currentTime);  // Add to queue
+    else
+        ++totalRejected;  // Track rejected customers
 }
 
 void QueueSimulation::processDeparture(const size_t& serverId) {
@@ -103,21 +113,25 @@ void QueueSimulation::printStatistics() {
 
     // Avoid division by zero
     if (totalSimulationTime <= 0 || totalServiced == 0) {
-        std::cout << "\nInsufficient data for statistics.\n";
+        cout << "\nInsufficient data for statistics.\n";
         return;
     }
 
-    std::cout << "\n--- SIMULATION STATISTICS ---\n";
-    std::cout << std::fixed << std::setprecision(4);
+    cout << "\n--- SIMULATION STATISTICS ---\n";
+    cout << std::fixed << std::setprecision(4);
 
     std::cout << "Total simulation time: " << totalSimulationTime << "\n";
     std::cout << "Total arrivals: " << totalArrivals << "\n";
     std::cout << "Total customers served: " << totalServiced << "\n";
+    std::cout << "Total customers rejected: " << totalRejected << "\n";
 
     // Calculate average statistics
     double avgQueueLength = totalQueueLength / totalSimulationTime;
-    double avgDelay = totalDelay / totalServiced;
-    double avgServerUtilization = (totalServerBusy / numServers) / totalSimulationTime;
+
+    size_t customersInSystem = totalArrivals - totalRejected;
+    double avgDelay = (customersInSystem > 0) ? (totalDelay / customersInSystem) : 0.0;
+
+    double avgServerUtilization = totalServerBusy / (numServers * totalSimulationTime);
 
     std::cout << "Average queue length: " << avgQueueLength << "\n";
     std::cout << "Average customer waiting time: " << avgDelay << "\n";

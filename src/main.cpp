@@ -14,10 +14,10 @@
 #include "QueueSimulation.h"
 
 int main() {
-    double iA_mean = 0.1;             // mean for inter-arrival generation
+    double iA_mean = 0.25;            // mean for inter-arrival generation
     double sD_mean = 0.2;             // mean for service duration generation
     size_t totalCustomer = 10000;     // maximum customers to serve
-    size_t numberOfServers = 5;       // number of server to utilize
+    size_t numberOfServers = 1;       // number of server to utilize
     size_t waitingQueueCapacity = 5;  // maximum customer that the waiting queue can hold
 
     QueueSimulation simulation(iA_mean, sD_mean, totalCustomer, numberOfServers, waitingQueueCapacity);

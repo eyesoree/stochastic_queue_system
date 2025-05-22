@@ -35,6 +35,7 @@ class QueueSimulation {
     double totalServerBusy = 0.0;      // Total time servers were busy
     size_t totalArrivals = 0;          // Total number of arrivals
     size_t totalServiced = 0;          // Total number of customers who completed service
+    size_t totalRejected = 0;          // Customers rejected due to full queue
 
     // Event handlers
     void processArrival();
@@ -53,7 +54,7 @@ class QueueSimulation {
                     const double& serviceDurationMean,
                     const size_t& maxCustomersToServe = 10,
                     const size_t& numberOfServers = 1,
-                    const size_t& maxWaitingQueue = 1000)
+                    const size_t& maxWaitingQueue = 5)
         : iA(interArrivalMean),
           sD(serviceDurationMean),
           maxCustomers(maxCustomersToServe),
